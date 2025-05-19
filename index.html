@@ -69,9 +69,9 @@
     let angle = 0;
     let isSpinning = false;
 
-    const winningSequence = [2, 4, 0, 7, 1]; // Indexe: gewünschte Gewinne
+    const winningSequence = [2]; // Indexe: gewünschte Gewinne
     let currentSpin = 0;
-    let spinsLeft = winningSequence.length;
+    let spinsLeft = 1;
 
     function drawWheel(currentAngle = 0) {
       ctx.clearRect(0, 0, size, size);
