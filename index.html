@@ -69,12 +69,10 @@
     let angle = 0;
     let isSpinning = false;
 
-    // 🧩 Anzahl erlaubter Drehungen
-    let spinsLeft = 3;
+    // 🎯 Gewinnreihenfolge
+    let winningSequence = [2, 4, 0]; // Indexe im options-Array
     let currentSpin = 0;
-
-    // 🎯 Gewinne festlegen (Index im options-Array)
-    let winningSequence = [2, 4, 0]; // z.B. 1 Day Key, Random Riot Acc, Lifetime Key
+    let spinsLeft = 3;
 
     function drawWheel(currentAngle = 0) {
       ctx.clearRect(0, 0, size, size);
@@ -110,8 +108,11 @@
       currentSpin++;
       spinsLeft--;
 
-      let targetAngle = (options.length - winningIndex) * arc - arc / 2;
-      let spinAngle = targetAngle + 10 * Math.PI;
+      // Zielwinkel berechnen (Mitte des Zielsegments bei Zeiger oben)
+      const targetAngle = (winningIndex + 0.5) * arc;
+
+      // Zielwinkel + viele Umdrehungen (10x)
+      const spinAngle = 10 * 2 * Math.PI + targetAngle;
 
       const duration = 3000;
       const startTime = performance.now();
@@ -142,3 +143,4 @@
   </script>
 </body>
 </html>
+``
