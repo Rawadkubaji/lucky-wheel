@@ -69,9 +69,9 @@
     let angle = 0;
     let isSpinning = false;
 
-    let winningSequence = [2, 4, 0]; // Indexe im options-Array
+    const winningSequence = [2, 4, 0, 7, 1]; // Indexe: gewünschte Gewinne
     let currentSpin = 0;
-    let spinsLeft = 3;
+    let spinsLeft = winningSequence.length;
 
     function drawWheel(currentAngle = 0) {
       ctx.clearRect(0, 0, size, size);
@@ -98,36 +98,40 @@
     }
 
     function spin() {
-      if (isSpinning || spinsLeft <= 0 || currentSpin >= winningSequence.length) return;
-      isSpinning = true;
+      if (isSpinning || currentSpin >= winningSequence.length) return;
 
-      let winningIndex = winningSequence[currentSpin];
+      isSpinning = true;
+      const winningIndex = winningSequence[currentSpin];
       currentSpin++;
       spinsLeft--;
 
-      // ✔ Zielwinkel korrekt berechnen: gegen den Uhrzeigersinn, daher von 2π abziehen
-      const targetAngle = (2 * Math.PI) - (winningIndex * arc + arc / 2);
-      const spinAngle = 10 * 2 * Math.PI + targetAngle;
+      // 🎯 Zielwinkel berechnen:
+      const minSpins = 5;
+      const fullSpins = minSpins * 2 * Math.PI;
 
-      const duration = 3000;
+      // Jedes Segment ist `arc` breit. Wir berechnen die Mitte des Zielsegments
+      const targetAngle = (2 * Math.PI) - (winningIndex * arc + arc / 2);
+
+      // Gesamtwinkel: mehrere Umdrehungen plus Zielsegment
+      const finalAngle = fullSpins + targetAngle;
+
+      const duration = 4000;
       const startTime = performance.now();
 
       function animate(time) {
-        let elapsed = time - startTime;
-        if (elapsed > duration) elapsed = duration;
-
-        const progress = elapsed / duration;
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
 
-        angle = spinAngle * eased;
+        angle = finalAngle * eased;
         drawWheel(angle);
 
-        if (elapsed < duration) {
+        if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
+          isSpinning = false;
           document.getElementById("result").innerText =
             `🎉 Du hast gewonnen: ${options[winningIndex]} (Noch ${spinsLeft} Spin(s))`;
-          isSpinning = false;
         }
       }
 
