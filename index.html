@@ -5,7 +5,7 @@
   <title>Valorant Lucky Wheel</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding-top: 50px;
       background: #111;
@@ -14,16 +14,30 @@
     canvas {
       background: #222;
       border-radius: 50%;
+      margin-bottom: 20px;
     }
     button {
       padding: 10px 20px;
       font-size: 18px;
-      margin-top: 20px;
+      cursor: pointer;
+    }
+    #pointer {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid red;
+      margin: 0 auto;
+      position: relative;
+      top: -520px;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
   <h1>🎯 Valorant Lucky Wheel</h1>
+
+  <div id="pointer"></div>
   <canvas id="wheel" width="500" height="500"></canvas><br>
   <button onclick="spin()">Spin!</button>
   <p id="result"></p>
@@ -47,18 +61,22 @@
         const startAngle = currentAngle + i * arc;
         const endAngle = currentAngle + (i + 1) * arc;
 
+        // Segment zeichnen
         ctx.beginPath();
         ctx.fillStyle = i % 2 === 0 ? "#6600cc" : "#9900ff";
         ctx.moveTo(size / 2, size / 2);
         ctx.arc(size / 2, size / 2, size / 2, startAngle, endAngle);
         ctx.fill();
 
+        // Text zeichnen
         ctx.save();
         ctx.translate(size / 2, size / 2);
         ctx.rotate(startAngle + arc / 2);
         ctx.fillStyle = "white";
         ctx.font = "16px Arial";
-        ctx.fillText(options[i], size / 4, 0);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(options[i], size / 3, 0);
         ctx.restore();
       }
     }
@@ -67,8 +85,8 @@
       if (isSpinning) return;
       isSpinning = true;
 
-      let spinAngle = Math.random() * 2 * Math.PI + 10 * Math.PI; // Random spin + 5 full rotations
-      const duration = 3000; // ms
+      let spinAngle = Math.random() * 2 * Math.PI + 10 * Math.PI; // mind. 5 Runden
+      const duration = 3000;
       const startTime = performance.now();
 
       function animate(time) {
@@ -87,7 +105,7 @@
           const finalAngle = angle % (2 * Math.PI);
           const winningIndex = Math.floor((options.length - finalAngle / arc) % options.length);
           document.getElementById("result").innerText =
-            "Du hast gewonnen: " + options[winningIndex] + " 🎉";
+            "🎉 Du hast gewonnen: " + options[winningIndex];
           isSpinning = false;
         }
       }
