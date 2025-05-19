@@ -69,7 +69,6 @@
     let angle = 0;
     let isSpinning = false;
 
-    // 🎯 Gewinnreihenfolge
     let winningSequence = [2, 4, 0]; // Indexe im options-Array
     let currentSpin = 0;
     let spinsLeft = 3;
@@ -80,14 +79,12 @@
         const startAngle = currentAngle + i * arc;
         const endAngle = currentAngle + (i + 1) * arc;
 
-        // Segment zeichnen
         ctx.beginPath();
         ctx.fillStyle = i % 2 === 0 ? "#6600cc" : "#9900ff";
         ctx.moveTo(size / 2, size / 2);
         ctx.arc(size / 2, size / 2, size / 2, startAngle, endAngle);
         ctx.fill();
 
-        // Text zeichnen
         ctx.save();
         ctx.translate(size / 2, size / 2);
         ctx.rotate(startAngle + arc / 2);
@@ -108,10 +105,8 @@
       currentSpin++;
       spinsLeft--;
 
-      // Zielwinkel berechnen (Mitte des Zielsegments bei Zeiger oben)
-      const targetAngle = (winningIndex + 0.5) * arc;
-
-      // Zielwinkel + viele Umdrehungen (10x)
+      // ✔ Zielwinkel korrekt berechnen: gegen den Uhrzeigersinn, daher von 2π abziehen
+      const targetAngle = (2 * Math.PI) - (winningIndex * arc + arc / 2);
       const spinAngle = 10 * 2 * Math.PI + targetAngle;
 
       const duration = 3000;
@@ -143,4 +138,3 @@
   </script>
 </body>
 </html>
-``
