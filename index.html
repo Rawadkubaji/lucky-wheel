@@ -55,20 +55,25 @@
     let angle = 0;
     let isSpinning = false;
 
+    // 🧩 Anzahl erlaubter Drehungen
+    let spinsLeft = 3;
+    let currentSpin = 0;
+
+    // 🎯 Welche Gewinne bei welcher Drehung kommen (Index im options-Array)
+    let winningSequence = [2, 4, 0]; // z. B. 1 Day Key, Random Riot Acc, Lifetime Key
+
     function drawWheel(currentAngle = 0) {
       ctx.clearRect(0, 0, size, size);
       for (let i = 0; i < options.length; i++) {
         const startAngle = currentAngle + i * arc;
         const endAngle = currentAngle + (i + 1) * arc;
 
-        // Segment zeichnen
         ctx.beginPath();
         ctx.fillStyle = i % 2 === 0 ? "#6600cc" : "#9900ff";
         ctx.moveTo(size / 2, size / 2);
         ctx.arc(size / 2, size / 2, size / 2, startAngle, endAngle);
         ctx.fill();
 
-        // Text zeichnen
         ctx.save();
         ctx.translate(size / 2, size / 2);
         ctx.rotate(startAngle + arc / 2);
@@ -82,13 +87,16 @@
     }
 
     function spin() {
-      if (isSpinning) return;
+      if (isSpinning || spinsLeft <= 0 || currentSpin >= winningSequence.length) return;
       isSpinning = true;
 
-      let winningIndex = 1; // <-- Hier bestimmst du, welches Feld kommen soll
+      let winningIndex = winningSequence[currentSpin];
+      currentSpin++;
+      spinsLeft--;
+
       let targetAngle = (options.length - winningIndex) * arc;
       let spinAngle = targetAngle + 10 * Math.PI;
- // mind. 5 Runden
+
       const duration = 3000;
       const startTime = performance.now();
 
@@ -105,10 +113,8 @@
         if (elapsed < duration) {
           requestAnimationFrame(animate);
         } else {
-          const finalAngle = angle % (2 * Math.PI);
-          const winningIndex = Math.floor((options.length - finalAngle / arc) % options.length);
           document.getElementById("result").innerText =
-            "🎉 Du hast gewonnen: " + options[winningIndex];
+            `🎉 Du hast gewonnen: ${options[winningIndex]} (Noch ${spinsLeft} Spin(s))`;
           isSpinning = false;
         }
       }
