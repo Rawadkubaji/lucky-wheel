@@ -11,31 +11,26 @@
       background: #111;
       color: white;
     }
-
-    #wheel-container {
+    #container {
       position: relative;
       display: inline-block;
     }
-
     #pointer {
-      position: absolute;
-      top: -25px;
-      left: 50%;
-      transform: translateX(-50%);
       width: 0;
       height: 0;
       border-left: 20px solid transparent;
       border-right: 20px solid transparent;
       border-bottom: 30px solid red;
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 10;
     }
-
     canvas {
       background: #222;
       border-radius: 50%;
-      display: block;
     }
-
     button {
       padding: 10px 20px;
       font-size: 18px;
@@ -47,7 +42,7 @@
 <body>
   <h1>🎯 Valorant Lucky Wheel</h1>
 
-  <div id="wheel-container">
+  <div id="container">
     <div id="pointer"></div>
     <canvas id="wheel" width="500" height="500"></canvas>
   </div>
@@ -69,9 +64,12 @@
     let angle = 0;
     let isSpinning = false;
 
-    const winningSequence = [2]; // Indexe: gewünschte Gewinne
+    // 🧩 Anzahl erlaubter Drehungen
+    let spinsLeft = 3;
     let currentSpin = 0;
-    let spinsLeft = 1;
+
+    // 🎯 Gewinne festlegen (Index im options-Array)
+    let winningSequence = [2, 4, 0]; // z.B. 1 Day Key, Random Riot Acc, Lifetime Key
 
     function drawWheel(currentAngle = 0) {
       ctx.clearRect(0, 0, size, size);
@@ -79,12 +77,14 @@
         const startAngle = currentAngle + i * arc;
         const endAngle = currentAngle + (i + 1) * arc;
 
+        // Segment zeichnen
         ctx.beginPath();
         ctx.fillStyle = i % 2 === 0 ? "#6600cc" : "#9900ff";
         ctx.moveTo(size / 2, size / 2);
         ctx.arc(size / 2, size / 2, size / 2, startAngle, endAngle);
         ctx.fill();
 
+        // Text zeichnen
         ctx.save();
         ctx.translate(size / 2, size / 2);
         ctx.rotate(startAngle + arc / 2);
@@ -98,40 +98,35 @@
     }
 
     function spin() {
-      if (isSpinning || currentSpin >= winningSequence.length) return;
-
+      if (isSpinning || spinsLeft <= 0 || currentSpin >= winningSequence.length) return;
       isSpinning = true;
-      const winningIndex = winningSequence[currentSpin];
+
+      let winningIndex = winningSequence[currentSpin];
       currentSpin++;
       spinsLeft--;
 
-      // 🎯 Zielwinkel berechnen:
-      const minSpins = 5;
-      const fullSpins = minSpins * 2 * Math.PI;
+      let targetAngle = (options.length - winningIndex) * arc - arc / 2;
+      let spinAngle = targetAngle + 10 * Math.PI;
 
-      // Jedes Segment ist `arc` breit. Wir berechnen die Mitte des Zielsegments
-      const targetAngle = (2 * Math.PI) - (winningIndex * arc + arc / 2);
-
-      // Gesamtwinkel: mehrere Umdrehungen plus Zielsegment
-      const finalAngle = fullSpins + targetAngle;
-
-      const duration = 4000;
+      const duration = 3000;
       const startTime = performance.now();
 
       function animate(time) {
-        const elapsed = time - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+        let elapsed = time - startTime;
+        if (elapsed > duration) elapsed = duration;
+
+        const progress = elapsed / duration;
         const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
 
-        angle = finalAngle * eased;
+        angle = spinAngle * eased;
         drawWheel(angle);
 
-        if (progress < 1) {
+        if (elapsed < duration) {
           requestAnimationFrame(animate);
         } else {
-          isSpinning = false;
           document.getElementById("result").innerText =
             `🎉 Du hast gewonnen: ${options[winningIndex]} (Noch ${spinsLeft} Spin(s))`;
+          isSpinning = false;
         }
       }
 
