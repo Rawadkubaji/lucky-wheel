@@ -4,9 +4,22 @@
   <meta charset="UTF-8">
   <title>Valorant Lucky Wheel</title>
   <style>
-    body { font-family: Arial; text-align: center; padding-top: 50px; background: #111; color: white; }
-    canvas { background: #222; border-radius: 50%; }
-    button { padding: 10px 20px; font-size: 18px; margin-top: 20px; }
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding-top: 50px;
+      background: #111;
+      color: white;
+    }
+    canvas {
+      background: #222;
+      border-radius: 50%;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -16,36 +29,73 @@
   <p id="result"></p>
 
   <script>
-    const options = ["Lifetime Key", "1 Week Key", "1 Day Key", "Ranked Acc", "Random Riot Acc", "Spin Again", "Nothing", "1 Free Spin"];
+    const options = [
+      "Lifetime Key", "1 Week Key", "1 Day Key", "Ranked Acc",
+      "Random Riot Acc", "Spin Again", "Nothing", "1 Free Spin"
+    ];
+
     const canvas = document.getElementById("wheel");
     const ctx = canvas.getContext("2d");
     const size = canvas.width;
     const arc = (2 * Math.PI) / options.length;
+    let angle = 0;
+    let isSpinning = false;
 
-    function drawWheel() {
+    function drawWheel(currentAngle = 0) {
+      ctx.clearRect(0, 0, size, size);
       for (let i = 0; i < options.length; i++) {
+        const startAngle = currentAngle + i * arc;
+        const endAngle = currentAngle + (i + 1) * arc;
+
         ctx.beginPath();
         ctx.fillStyle = i % 2 === 0 ? "#6600cc" : "#9900ff";
         ctx.moveTo(size / 2, size / 2);
-        ctx.arc(size / 2, size / 2, size / 2, i * arc, (i + 1) * arc);
+        ctx.arc(size / 2, size / 2, size / 2, startAngle, endAngle);
         ctx.fill();
-        ctx.fillStyle = "white";
-        ctx.font = "16px Arial";
+
         ctx.save();
         ctx.translate(size / 2, size / 2);
-        ctx.rotate((i + 0.5) * arc);
+        ctx.rotate(startAngle + arc / 2);
+        ctx.fillStyle = "white";
+        ctx.font = "16px Arial";
         ctx.fillText(options[i], size / 4, 0);
         ctx.restore();
       }
     }
 
-    drawWheel();
-
     function spin() {
-      const randomIndex = Math.floor(Math.random() * options.length);
-      const result = options[randomIndex];
-      document.getElementById("result").innerText = "Du hast gewonnen: " + result + " 🎉";
+      if (isSpinning) return;
+      isSpinning = true;
+
+      let spinAngle = Math.random() * 2 * Math.PI + 10 * Math.PI; // Random spin + 5 full rotations
+      const duration = 3000; // ms
+      const startTime = performance.now();
+
+      function animate(time) {
+        let elapsed = time - startTime;
+        if (elapsed > duration) elapsed = duration;
+
+        const progress = elapsed / duration;
+        const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+
+        angle = spinAngle * eased;
+        drawWheel(angle);
+
+        if (elapsed < duration) {
+          requestAnimationFrame(animate);
+        } else {
+          const finalAngle = angle % (2 * Math.PI);
+          const winningIndex = Math.floor((options.length - finalAngle / arc) % options.length);
+          document.getElementById("result").innerText =
+            "Du hast gewonnen: " + options[winningIndex] + " 🎉";
+          isSpinning = false;
+        }
+      }
+
+      requestAnimationFrame(animate);
     }
+
+    drawWheel();
   </script>
 </body>
 </html>
