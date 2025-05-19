@@ -85,7 +85,10 @@
       if (isSpinning) return;
       isSpinning = true;
 
-      let spinAngle = Math.random() * 2 * Math.PI + 10 * Math.PI; // mind. 5 Runden
+      let winningIndex = 1; // <-- Hier bestimmst du, welches Feld kommen soll
+      let targetAngle = (options.length - winningIndex) * arc;
+      let spinAngle = targetAngle + 10 * Math.PI;
+ // mind. 5 Runden
       const duration = 3000;
       const startTime = performance.now();
 
