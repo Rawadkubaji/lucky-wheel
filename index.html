@@ -37,6 +37,10 @@
       cursor: pointer;
       margin-top: 20px;
     }
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -48,7 +52,7 @@
   </div>
 
   <br>
-  <button onclick="spin()">Spin!</button>
+  <button id="spinButton" onclick="spin()">Spin!</button>
   <p id="result"></p>
 
   <script>
@@ -64,12 +68,9 @@
     let angle = 0;
     let isSpinning = false;
 
-    // 🧩 Anzahl erlaubter Drehungen
-    let spinsLeft = 2;
+    let spinsLeft = 3;
     let currentSpin = 0;
-
-    // 🎯 Gewinne festlegen (Index im options-Array)
-    let winningSequence = [2, 4, 0]; // z.B. 1 Day Key, Random Riot Acc, Lifetime Key
+    const winningSequence = [2, 4, 0]; // z.B. 1 Day Key, Random Riot Acc, Lifetime Key
 
     function drawWheel(currentAngle = 0) {
       ctx.clearRect(0, 0, size, size);
@@ -77,14 +78,12 @@
         const startAngle = currentAngle + i * arc;
         const endAngle = currentAngle + (i + 1) * arc;
 
-        // Segment zeichnen
         ctx.beginPath();
         ctx.fillStyle = i % 2 === 0 ? "#6600cc" : "#9900ff";
         ctx.moveTo(size / 2, size / 2);
         ctx.arc(size / 2, size / 2, size / 2, startAngle, endAngle);
         ctx.fill();
 
-        // Text zeichnen
         ctx.save();
         ctx.translate(size / 2, size / 2);
         ctx.rotate(startAngle + arc / 2);
@@ -101,32 +100,37 @@
       if (isSpinning || spinsLeft <= 0 || currentSpin >= winningSequence.length) return;
       isSpinning = true;
 
+      const spinButton = document.getElementById("spinButton");
+
       let winningIndex = winningSequence[currentSpin];
       currentSpin++;
       spinsLeft--;
 
-      let targetAngle = (options.length - winningIndex) * arc - arc / 2;
-      let spinAngle = targetAngle + 10 * Math.PI;
+      let targetAngle = (2 * Math.PI) - (winningIndex * arc + arc / 2);
+      let spinAngle = targetAngle + 10 * 2 * Math.PI;
 
       const duration = 3000;
       const startTime = performance.now();
 
       function animate(time) {
         let elapsed = time - startTime;
-        if (elapsed > duration) elapsed = duration;
-
-        const progress = elapsed / duration;
-        const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+        let progress = Math.min(elapsed / duration, 1);
+        let eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
 
         angle = spinAngle * eased;
         drawWheel(angle);
 
-        if (elapsed < duration) {
+        if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
           document.getElementById("result").innerText =
             `🎉 Du hast gewonnen: ${options[winningIndex]} (Noch ${spinsLeft} Spin(s))`;
           isSpinning = false;
+
+          if (spinsLeft === 0) {
+            spinButton.disabled = true;
+            spinButton.innerText = "Keine Spins mehr!";
+          }
         }
       }
 
